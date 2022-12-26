@@ -1,0 +1,64 @@
+body {
+    overflow: hidden;
+}
+#preview {
+    max-width: 500px;
+}
+
+.preview-field {
+    width: 500px;
+}
+
+.button {
+    border: 1px solid black;
+    border-radius: 3px;
+    width: 50px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+}
+.button span {
+    font-size: large;
+    font-weight: 700;
+}
+
+.input {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.main {
+    display: flex;
+    justify-content: space-between;
+}
+
+#prediction {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 180px;
+    padding: 0 10px 0 10px;
+    height: 90vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+#prediction::-webkit-scrollbar {
+    display: none;
+}
+
+.predict-raw {
+    display: flex;
+    justify-content: space-between;
+}
+
+.predict-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 10px 15px;
+}

@@ -1,0 +1,10 @@
+API/__pycache__
+API/post.py
+**/node_modules
+.vscode
+classification
+predict
+processing
+scraping
+training
+.DS_store
