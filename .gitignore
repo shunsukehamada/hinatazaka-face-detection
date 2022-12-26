@@ -8,3 +8,4 @@ processing
 scraping
 training
 .DS_store
+.mypy_cache

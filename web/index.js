@@ -107,4 +107,3 @@ const createCroppedCanvas = (img, top, right, bottom, left) => {
     ctx === null || ctx === void 0 ? void 0 : ctx.drawImage(img, sx, sy, imgWidth * 1.2, imgHeight * 1.2, 0, 0, 150, 150);
     return canvas;
 };
-// sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number
