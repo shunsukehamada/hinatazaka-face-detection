@@ -47,7 +47,7 @@ const getImageUrl = async (blob: Blob): Promise<string> => {
     });
 };
 
-const previewImage = (imageUrl: string) => {
+const previewImage = (imageUrl: string): void => {
     const imgTag = document.getElementById("preview") as HTMLImageElement;
     imgTag.setAttribute("src", imageUrl);
 };
@@ -83,6 +83,9 @@ predictButton.addEventListener("click", async () => {
         const image_base = imageUrl.replace(/data:.*\/.*;base64,/, "");
         try {
             const predictions = await predict(image_base, controller);
+            if (predictions.length === 0) {
+                alert("顔が検出できませんでした");
+            }
             setPrediction(predictions, imageUrl);
         } finally {
             hideLoader();
@@ -90,7 +93,7 @@ predictButton.addEventListener("click", async () => {
     }
 });
 
-const setPrediction = (predictions: PredictResponse[], imageUrl: string) => {
+const setPrediction = (predictions: PredictResponse[], imageUrl: string): void => {
     const predictionField = document.getElementById("prediction") as HTMLDivElement;
     while (predictionField.firstChild) {
         predictionField.removeChild(predictionField.firstChild);
@@ -142,17 +145,17 @@ const createCroppedCanvas = (
     return canvas;
 };
 
-const displayLoader = () => {
+const displayLoader = (): void => {
     const loader = document.querySelector(".loader-wrap") as HTMLDivElement;
     loader.classList.remove("hidden");
 };
 
-const hideLoader = () => {
+const hideLoader = (): void => {
     const loader = document.querySelector(".loader-wrap") as HTMLDivElement;
     loader.classList.add("hidden");
 };
 
-const setCancel = (controller: AbortController) => {
+const setCancel = (controller: AbortController): void => {
     const abortButton = document.getElementById("abort") as HTMLDivElement;
     abortButton.onclick = () => {
         hideLoader();

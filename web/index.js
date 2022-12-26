@@ -66,6 +66,9 @@ predictButton.addEventListener("click", () => __awaiter(void 0, void 0, void 0, 
         const image_base = imageUrl.replace(/data:.*\/.*;base64,/, "");
         try {
             const predictions = yield predict(image_base, controller);
+            if (predictions.length === 0) {
+                alert("顔が検出できませんでした");
+            }
             setPrediction(predictions, imageUrl);
         }
         finally {
