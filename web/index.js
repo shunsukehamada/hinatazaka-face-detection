@@ -12,10 +12,12 @@ const fileInput = document.getElementById("file");
 fileInput === null || fileInput === void 0 ? void 0 : fileInput.addEventListener("change", (e) => __awaiter(void 0, void 0, void 0, function* () {
     const files = fileInput.files;
     if (files) {
+        if (files.length === 0) {
+            return;
+        }
         const file = files[0];
         const imageUrl = yield getImageUrl(file);
         previewImage(imageUrl);
-        // const image_base = imageUrl.replace(/data:.*\/.*;base64,/, "");
     }
 }));
 const getImageUrl = (blob) => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,7 +38,7 @@ const previewImage = (imageUrl) => {
     const imgTag = document.getElementById("preview");
     imgTag.setAttribute("src", imageUrl);
 };
-const predict = (image_base) => __awaiter(void 0, void 0, void 0, function* () {
+const predict = (image_base, controller) => __awaiter(void 0, void 0, void 0, function* () {
     const data = { image_base };
     const res = yield fetch("http://127.0.0.1:5000/predict", {
         method: "POST",
@@ -45,6 +47,7 @@ const predict = (image_base) => __awaiter(void 0, void 0, void 0, function* () {
         },
         body: JSON.stringify(data),
         mode: "cors",
+        signal: controller === null || controller === void 0 ? void 0 : controller.signal,
     });
     return (yield res.json());
 });
@@ -55,11 +58,19 @@ predictButton.addEventListener("click", () => __awaiter(void 0, void 0, void 0, 
         if (files.length === 0) {
             return;
         }
+        displayLoader();
+        const controller = new AbortController();
+        setCancel(controller);
         const file = files[0];
         const imageUrl = yield getImageUrl(file);
         const image_base = imageUrl.replace(/data:.*\/.*;base64,/, "");
-        const predictions = yield predict(image_base);
-        setPrediction(predictions, imageUrl);
+        try {
+            const predictions = yield predict(image_base, controller);
+            setPrediction(predictions, imageUrl);
+        }
+        finally {
+            hideLoader();
+        }
     }
 }));
 const setPrediction = (predictions, imageUrl) => {
@@ -99,11 +110,25 @@ const createCroppedCanvas = (img, top, right, bottom, left) => {
     canvas.width = 150;
     canvas.height = 150;
     const ctx = canvas.getContext("2d");
-    console.log(top, left, right - left, bottom - top);
     const imgHeight = bottom - top;
     const imgWidth = right - left;
     const sx = left - imgWidth * 0.1 >= 0 ? left - imgWidth * 0.1 : 0;
     const sy = top - imgHeight * 0.1 >= 0 ? top - imgHeight * 0.1 : 0;
     ctx === null || ctx === void 0 ? void 0 : ctx.drawImage(img, sx, sy, imgWidth * 1.2, imgHeight * 1.2, 0, 0, 150, 150);
     return canvas;
+};
+const displayLoader = () => {
+    const loader = document.querySelector(".loader-wrap");
+    loader.classList.remove("hidden");
+};
+const hideLoader = () => {
+    const loader = document.querySelector(".loader-wrap");
+    loader.classList.add("hidden");
+};
+const setCancel = (controller) => {
+    const abortButton = document.getElementById("abort");
+    abortButton.onclick = () => {
+        hideLoader();
+        controller.abort();
+    };
 };

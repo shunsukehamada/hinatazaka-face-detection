@@ -24,10 +24,12 @@ const fileInput = document.getElementById("file") as HTMLInputElement;
 fileInput?.addEventListener("change", async (e) => {
     const files = fileInput.files;
     if (files) {
+        if (files.length === 0) {
+            return;
+        }
         const file = files[0];
         const imageUrl = await getImageUrl(file);
         previewImage(imageUrl);
-        // const image_base = imageUrl.replace(/data:.*\/.*;base64,/, "");
     }
 });
 
@@ -50,7 +52,10 @@ const previewImage = (imageUrl: string) => {
     imgTag.setAttribute("src", imageUrl);
 };
 
-const predict = async (image_base: string | ArrayBuffer | null): Promise<PredictResponse[]> => {
+const predict = async (
+    image_base: string | ArrayBuffer | null,
+    controller?: AbortController
+): Promise<PredictResponse[]> => {
     const data: RequestBody = { image_base };
     const res = await fetch("http://127.0.0.1:5000/predict", {
         method: "POST",
@@ -59,6 +64,7 @@ const predict = async (image_base: string | ArrayBuffer | null): Promise<Predict
         },
         body: JSON.stringify(data),
         mode: "cors",
+        signal: controller?.signal,
     });
     return (await res.json()) as PredictResponse[];
 };
@@ -69,11 +75,18 @@ predictButton.addEventListener("click", async () => {
         if (files.length === 0) {
             return;
         }
+        displayLoader();
+        const controller = new AbortController();
+        setCancel(controller);
         const file = files[0];
         const imageUrl = await getImageUrl(file);
         const image_base = imageUrl.replace(/data:.*\/.*;base64,/, "");
-        const predictions = await predict(image_base);
-        setPrediction(predictions, imageUrl);
+        try {
+            const predictions = await predict(image_base, controller);
+            setPrediction(predictions, imageUrl);
+        } finally {
+            hideLoader();
+        }
     }
 });
 
@@ -121,11 +134,28 @@ const createCroppedCanvas = (
     canvas.width = 150;
     canvas.height = 150;
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-    console.log(top, left, right - left, bottom - top);
     const imgHeight = bottom - top;
     const imgWidth = right - left;
     const sx = left - imgWidth * 0.1 >= 0 ? left - imgWidth * 0.1 : 0;
     const sy = top - imgHeight * 0.1 >= 0 ? top - imgHeight * 0.1 : 0;
     ctx?.drawImage(img, sx, sy, imgWidth * 1.2, imgHeight * 1.2, 0, 0, 150, 150);
     return canvas;
+};
+
+const displayLoader = () => {
+    const loader = document.querySelector(".loader-wrap") as HTMLDivElement;
+    loader.classList.remove("hidden");
+};
+
+const hideLoader = () => {
+    const loader = document.querySelector(".loader-wrap") as HTMLDivElement;
+    loader.classList.add("hidden");
+};
+
+const setCancel = (controller: AbortController) => {
+    const abortButton = document.getElementById("abort") as HTMLDivElement;
+    abortButton.onclick = () => {
+        hideLoader();
+        controller.abort();
+    };
 };
